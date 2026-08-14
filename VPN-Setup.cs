@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -12,7 +12,10 @@ namespace V2raySetup
 {
     internal static class Program
     {
-        private const string Version = "1.0";
+        // 1.1 — SOCKS-прокси больше не слушает внешние интерфейсы.
+        // В 1.0 стоял AllowLANConn=true, из-за чего порт 10808 был открыт
+        // наружу без пароля и машины использовали как открытый прокси.
+        private const string Version = "1.1";
         private const string Api = "https://api.github.com/repos/2dust/v2rayN/releases/latest";
         private const string AssetName = "v2rayN-windows-64.zip";
 
@@ -89,30 +92,30 @@ namespace V2raySetup
             "ZW5ndGgiOiBudWxsLA0KICAgICJJbnRlcnZhbCI6IG51bGwNCiAgfSwNCiAgIkluYm91bmQiOiBbDQogICAgew0KICAgICAgIkxv" +
             "Y2FsUG9ydCI6IDEwODA4LA0KICAgICAgIlByb3RvY29sIjogInNvY2tzIiwNCiAgICAgICJVZHBFbmFibGVkIjogdHJ1ZSwNCiAg" +
             "ICAgICJTbmlmZmluZ0VuYWJsZWQiOiB0cnVlLA0KICAgICAgIkRlc3RPdmVycmlkZSI6IFsiaHR0cCIsInRscyIsInF1aWMiXSwN" +
-            "CiAgICAgICJSb3V0ZU9ubHkiOiBmYWxzZSwNCiAgICAgICJBbGxvd0xBTkNvbm4iOiB0cnVlLA0KICAgICAgIk5ld1BvcnQ0TEFO" +
-            "IjogZmFsc2UsDQogICAgICAiVXNlciI6ICIiLA0KICAgICAgIlBhc3MiOiAiIiwNCiAgICAgICJTZWNvbmRMb2NhbFBvcnRFbmFi" +
-            "bGVkIjogZmFsc2UNCiAgICB9DQogIF0sDQogICJHbG9iYWxIb3RrZXlzIjogW10sDQogICJDb3JlVHlwZUl0ZW0iOiBbDQogICAg" +
-            "ew0KICAgICAgIkNvbmZpZ1R5cGUiOiAxLA0KICAgICAgIkNvcmVUeXBlIjogMg0KICAgIH0sDQogICAgew0KICAgICAgIkNvbmZp" +
-            "Z1R5cGUiOiAyLA0KICAgICAgIkNvcmVUeXBlIjogMg0KICAgIH0sDQogICAgew0KICAgICAgIkNvbmZpZ1R5cGUiOiAzLA0KICAg" +
-            "ICAgIkNvcmVUeXBlIjogMg0KICAgIH0sDQogICAgew0KICAgICAgIkNvbmZpZ1R5cGUiOiA0LA0KICAgICAgIkNvcmVUeXBlIjog" +
-            "Mg0KICAgIH0sDQogICAgew0KICAgICAgIkNvbmZpZ1R5cGUiOiA1LA0KICAgICAgIkNvcmVUeXBlIjogMg0KICAgIH0sDQogICAg" +
-            "ew0KICAgICAgIkNvbmZpZ1R5cGUiOiA2LA0KICAgICAgIkNvcmVUeXBlIjogMg0KICAgIH0sDQogICAgew0KICAgICAgIkNvbmZp" +
-            "Z1R5cGUiOiA3LA0KICAgICAgIkNvcmVUeXBlIjogMg0KICAgIH0sDQogICAgew0KICAgICAgIkNvbmZpZ1R5cGUiOiA4LA0KICAg" +
-            "ICAgIkNvcmVUeXBlIjogMg0KICAgIH0sDQogICAgew0KICAgICAgIkNvbmZpZ1R5cGUiOiA5LA0KICAgICAgIkNvcmVUeXBlIjog" +
-            "Mg0KICAgIH0sDQogICAgew0KICAgICAgIkNvbmZpZ1R5cGUiOiAxMCwNCiAgICAgICJDb3JlVHlwZSI6IDINCiAgICB9LA0KICAg" +
-            "IHsNCiAgICAgICJDb25maWdUeXBlIjogMTEsDQogICAgICAiQ29yZVR5cGUiOiAyDQogICAgfSwNCiAgICB7DQogICAgICAiQ29u" +
-            "ZmlnVHlwZSI6IDEyLA0KICAgICAgIkNvcmVUeXBlIjogMg0KICAgIH0sDQogICAgew0KICAgICAgIkNvbmZpZ1R5cGUiOiAxMDEs" +
-            "DQogICAgICAiQ29yZVR5cGUiOiAyDQogICAgfSwNCiAgICB7DQogICAgICAiQ29uZmlnVHlwZSI6IDEwMiwNCiAgICAgICJDb3Jl" +
-            "VHlwZSI6IDINCiAgICB9DQogIF0sDQogICJTaW1wbGVETlNJdGVtIjogew0KICAgICJVc2VTeXN0ZW1Ib3N0cyI6IGZhbHNlLA0K" +
-            "ICAgICJBZGRDb21tb25Ib3N0cyI6IHRydWUsDQogICAgIkZha2VJUCI6IGZhbHNlLA0KICAgICJHbG9iYWxGYWtlSXAiOiB0cnVl" +
-            "LA0KICAgICJGYWtlSVBSYW5nZSI6IG51bGwsDQogICAgIkJsb2NrQmluZGluZ1F1ZXJ5IjogdHJ1ZSwNCiAgICAiRGlyZWN0RE5T" +
-            "IjogIjc3Ljg4LjguOCIsDQogICAgIlJlbW90ZUROUyI6ICI4LjguOC44LGh0dHBzOi8vZG5zLmdvb2dsZS9kbnMtcXVlcnksMS4x" +
-            "LjEuMSIsDQogICAgIkJvb3RzdHJhcEROUyI6ICI3Ny44OC44LjgiLA0KICAgICJTdHJhdGVneTRGcmVlZG9tIjogIiIsDQogICAg" +
-            "IlN0cmF0ZWd5NFByb3h5IjogIiIsDQogICAgIlN0cmF0ZWd5NFByb3h5RGlhbCI6IG51bGwsDQogICAgIlNlcnZlU3RhbGUiOiBm" +
-            "YWxzZSwNCiAgICAiUGFyYWxsZWxRdWVyeSI6IGZhbHNlLA0KICAgICJIb3N0cyI6ICIiLA0KICAgICJEaXJlY3RFeHBlY3RlZElQ" +
-            "cyI6IG51bGwsDQogICAgIkVuYWJsZUhhcHB5RXllYmFsbHMiOiBudWxsDQogIH0sDQogICJIYXBweUV5ZWJhbGxzNFJheUl0ZW0i" +
-            "OiB7DQogICAgIlRyeURlbGF5TXMiOiAyNTAsDQogICAgIlByaW9yaXRpemVJUHY2IjogZmFsc2UsDQogICAgIkludGVybGVhdmUi" +
-            "OiAxLA0KICAgICJNYXhDb25jdXJyZW50VHJ5IjogNA0KICB9DQp9";
+            "CiAgICAgICJSb3V0ZU9ubHkiOiBmYWxzZSwNCiAgICAgICJBbGxvd0xBTkNvbm4iOiBmYWxzZSwNCiAgICAgICJOZXdQb3J0NExB" +
+            "TiI6IGZhbHNlLA0KICAgICAgIlVzZXIiOiAiIiwNCiAgICAgICJQYXNzIjogIiIsDQogICAgICAiU2Vjb25kTG9jYWxQb3J0RW5h" +
+            "YmxlZCI6IGZhbHNlDQogICAgfQ0KICBdLA0KICAiR2xvYmFsSG90a2V5cyI6IFtdLA0KICAiQ29yZVR5cGVJdGVtIjogWw0KICAg" +
+            "IHsNCiAgICAgICJDb25maWdUeXBlIjogMSwNCiAgICAgICJDb3JlVHlwZSI6IDINCiAgICB9LA0KICAgIHsNCiAgICAgICJDb25m" +
+            "aWdUeXBlIjogMiwNCiAgICAgICJDb3JlVHlwZSI6IDINCiAgICB9LA0KICAgIHsNCiAgICAgICJDb25maWdUeXBlIjogMywNCiAg" +
+            "ICAgICJDb3JlVHlwZSI6IDINCiAgICB9LA0KICAgIHsNCiAgICAgICJDb25maWdUeXBlIjogNCwNCiAgICAgICJDb3JlVHlwZSI6" +
+            "IDINCiAgICB9LA0KICAgIHsNCiAgICAgICJDb25maWdUeXBlIjogNSwNCiAgICAgICJDb3JlVHlwZSI6IDINCiAgICB9LA0KICAg" +
+            "IHsNCiAgICAgICJDb25maWdUeXBlIjogNiwNCiAgICAgICJDb3JlVHlwZSI6IDINCiAgICB9LA0KICAgIHsNCiAgICAgICJDb25m" +
+            "aWdUeXBlIjogNywNCiAgICAgICJDb3JlVHlwZSI6IDINCiAgICB9LA0KICAgIHsNCiAgICAgICJDb25maWdUeXBlIjogOCwNCiAg" +
+            "ICAgICJDb3JlVHlwZSI6IDINCiAgICB9LA0KICAgIHsNCiAgICAgICJDb25maWdUeXBlIjogOSwNCiAgICAgICJDb3JlVHlwZSI6" +
+            "IDINCiAgICB9LA0KICAgIHsNCiAgICAgICJDb25maWdUeXBlIjogMTAsDQogICAgICAiQ29yZVR5cGUiOiAyDQogICAgfSwNCiAg" +
+            "ICB7DQogICAgICAiQ29uZmlnVHlwZSI6IDExLA0KICAgICAgIkNvcmVUeXBlIjogMg0KICAgIH0sDQogICAgew0KICAgICAgIkNv" +
+            "bmZpZ1R5cGUiOiAxMiwNCiAgICAgICJDb3JlVHlwZSI6IDINCiAgICB9LA0KICAgIHsNCiAgICAgICJDb25maWdUeXBlIjogMTAx" +
+            "LA0KICAgICAgIkNvcmVUeXBlIjogMg0KICAgIH0sDQogICAgew0KICAgICAgIkNvbmZpZ1R5cGUiOiAxMDIsDQogICAgICAiQ29y" +
+            "ZVR5cGUiOiAyDQogICAgfQ0KICBdLA0KICAiU2ltcGxlRE5TSXRlbSI6IHsNCiAgICAiVXNlU3lzdGVtSG9zdHMiOiBmYWxzZSwN" +
+            "CiAgICAiQWRkQ29tbW9uSG9zdHMiOiB0cnVlLA0KICAgICJGYWtlSVAiOiBmYWxzZSwNCiAgICAiR2xvYmFsRmFrZUlwIjogdHJ1" +
+            "ZSwNCiAgICAiRmFrZUlQUmFuZ2UiOiBudWxsLA0KICAgICJCbG9ja0JpbmRpbmdRdWVyeSI6IHRydWUsDQogICAgIkRpcmVjdERO" +
+            "UyI6ICI3Ny44OC44LjgiLA0KICAgICJSZW1vdGVETlMiOiAiOC44LjguOCxodHRwczovL2Rucy5nb29nbGUvZG5zLXF1ZXJ5LDEu" +
+            "MS4xLjEiLA0KICAgICJCb290c3RyYXBETlMiOiAiNzcuODguOC44IiwNCiAgICAiU3RyYXRlZ3k0RnJlZWRvbSI6ICIiLA0KICAg" +
+            "ICJTdHJhdGVneTRQcm94eSI6ICIiLA0KICAgICJTdHJhdGVneTRQcm94eURpYWwiOiBudWxsLA0KICAgICJTZXJ2ZVN0YWxlIjog" +
+            "ZmFsc2UsDQogICAgIlBhcmFsbGVsUXVlcnkiOiBmYWxzZSwNCiAgICAiSG9zdHMiOiAiIiwNCiAgICAiRGlyZWN0RXhwZWN0ZWRJ" +
+            "UHMiOiBudWxsLA0KICAgICJFbmFibGVIYXBweUV5ZWJhbGxzIjogbnVsbA0KICB9LA0KICAiSGFwcHlFeWViYWxsczRSYXlJdGVt" +
+            "Ijogew0KICAgICJUcnlEZWxheU1zIjogMjUwLA0KICAgICJQcmlvcml0aXplSVB2NiI6IGZhbHNlLA0KICAgICJJbnRlcmxlYXZl" +
+            "IjogMSwNCiAgICAiTWF4Q29uY3VycmVudFRyeSI6IDQNCiAgfQ0KfQ==";
 
 
         private static string _root;      // папка, где лежит установщик
